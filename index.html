@@ -48,7 +48,8 @@
         <h3>Ecosystem 3D Graf</h3>
         <p>Klikk og dra for å rotere</p>
         <p>Scroll for å zoome</p>
-        <p>Klikk på en node for detaljer</p>
+        <p>Klikk på en node for detaljer og relasjonshighlighting</p>
+        <p>Klikk på bakgrunnen for å fjerne highlighting</p>
     </div>
     <div id="controls">
         <label for="datasetSelect" style="display: block; margin-bottom: 5px;">Velg datasett:</label>
@@ -56,7 +57,8 @@
             <option value="">Laster...</option>
         </select>
         <br>
-        <button onclick="resetCamera()">Reset Kamera</button>
+        <button onclick="resetCamera()" style="margin-right: 5px;">Reset Kamera</button>
+        <button onclick="clearHighlight()" style="margin-right: 5px;">Fjern Highlighting</button>
     </div>
 
     <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
@@ -67,6 +69,9 @@
         let data = null;
         let Graph = null;
         let availableDatasets = [];
+        let highlightNodes = new Set();
+        let highlightLinks = new Set();
+        let hoverNode = null;
 
         // Funksjon for å hente tilgjengelige datasett
         async function loadAvailableDatasets() {
@@ -170,12 +175,24 @@
                     // Lag en gruppe for node med tekst
                     const group = new THREE.Group();
                     
+                    // Bestem farge og opacity basert på highlighting
+                    let nodeColor = groupColors[node.group] || '#cccccc';
+                    let nodeOpacity = 0.9;
+                    
+                    if (highlightNodes.size > 0) {
+                        if (!highlightNodes.has(node)) {
+                            nodeOpacity = 0.3;
+                        } else {
+                            nodeOpacity = 1.0;
+                        }
+                    }
+                    
                     // Lag sfære for noden
                     const sphereGeometry = new THREE.SphereGeometry(8);
                     const sphereMaterial = new THREE.MeshLambertMaterial({
-                        color: groupColors[node.group] || '#cccccc',
+                        color: nodeColor,
                         transparent: true,
-                        opacity: 0.9
+                        opacity: nodeOpacity
                     });
                     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                     group.add(sphere);
@@ -192,19 +209,31 @@
                     sprite.position.y = 15;
                     sprite.scale.set(30, 10, 1);
                     sprite.renderOrder = 999;
+                    
+                    // Juster tekst opacity basert på highlighting
+                    sprite.material.opacity = highlightNodes.size === 0 || highlightNodes.has(node) ? 1.0 : 0.3;
+                    
                     group.add(sprite);
                     
                     return group;
                 })
-                .linkColor(() => 'rgba(255,255,255,0.6)')
-                .linkWidth(1)
-                .linkOpacity(0.6)
+                .linkColor(link => highlightLinks.has(link) ? '#ff6b6b' : 'rgba(255,255,255,0.6)')
+                .linkWidth(link => highlightLinks.has(link) ? 3 : 1)
+                .linkOpacity(link => highlightLinks.has(link) ? 1 : 0.6)
                 .onNodeClick(node => {
+                    // Oppdater highlighting
+                    updateHighlight(node);
+                    
                     // Oppdater info-panelet
+                    const connectedNodes = getConnectedNodes(node);
                     document.getElementById('info').innerHTML = `
                         <h3>${node.id}</h3>
                         <p><strong>Gruppe:</strong> ${node.group}</p>
+                        <p><strong>Tilkoblinger:</strong> ${connectedNodes.length}</p>
                         <p>${node.description}</p>
+                        <hr>
+                        <p style="font-size: 11px;"><strong>Klikk på en annen node for å se nye relasjoner</strong></p>
+                        <p style="font-size: 11px;"><strong>Klikk på bakgrunnen for å fjerne highlighting</strong></p>
                     `;
                     
                     // Flytt kameraet for å fokusere på noden
@@ -216,6 +245,25 @@
                         node, // se mot noden
                         1000  // animasjonstid i ms
                     );
+                })
+                .onBackgroundClick(() => {
+                    // Fjern highlighting når man klikker på bakgrunnen
+                    clearHighlight();
+                    document.getElementById('info').innerHTML = `
+                        <h3>Ecosystem 3D Graf</h3>
+                        <p><strong>Datasett:</strong> ${document.getElementById('datasetSelect').value}</p>
+                        <p><strong>Noder:</strong> ${data.nodes.length}</p>
+                        <p><strong>Lenker:</strong> ${data.links.length}</p>
+                        <p>Klikk på en node for detaljer og relasjonshighlighting</p>
+                    `;
+                })
+                .nodeColor(node => {
+                    if (highlightNodes.size === 0) {
+                        return groupColors[node.group] || '#cccccc';
+                    }
+                    return highlightNodes.has(node) ? 
+                        (groupColors[node.group] || '#cccccc') : 
+                        'rgba(150,150,150,0.3)';
                 })
                 .backgroundColor('#000000');
             
@@ -248,6 +296,65 @@
                 texture.needsUpdate = true;
                 return texture;
             }
+            
+            // Helper functions for highlighting
+            function getConnectedNodes(node) {
+                const connectedNodes = new Set();
+                connectedNodes.add(node);
+                
+                data.links.forEach(link => {
+                    if (link.source === node || link.source.id === node.id) {
+                        connectedNodes.add(link.target);
+                    }
+                    if (link.target === node || link.target.id === node.id) {
+                        connectedNodes.add(link.source);
+                    }
+                });
+                
+                return Array.from(connectedNodes);
+            }
+            
+            function updateHighlight(node) {
+                // Clear previous highlights
+                highlightNodes.clear();
+                highlightLinks.clear();
+                
+                if (node) {
+                    // Add clicked node
+                    highlightNodes.add(node);
+                    
+                    // Add connected nodes and links
+                    data.links.forEach(link => {
+                        if (link.source === node || link.source.id === node.id) {
+                            highlightNodes.add(link.target);
+                            highlightLinks.add(link);
+                        }
+                        if (link.target === node || link.target.id === node.id) {
+                            highlightNodes.add(link.source);
+                            highlightLinks.add(link);
+                        }
+                    });
+                }
+                
+                // Update graph display
+                Graph.nodeColor(Graph.nodeColor());
+                Graph.linkColor(Graph.linkColor());
+                Graph.linkWidth(Graph.linkWidth());
+                Graph.linkOpacity(Graph.linkOpacity());
+                Graph.nodeThreeObject(Graph.nodeThreeObject());
+            }
+            
+            function clearHighlight() {
+                highlightNodes.clear();
+                highlightLinks.clear();
+                
+                // Update graph display
+                Graph.nodeColor(Graph.nodeColor());
+                Graph.linkColor(Graph.linkColor());
+                Graph.linkWidth(Graph.linkWidth());
+                Graph.linkOpacity(Graph.linkOpacity());
+                Graph.nodeThreeObject(Graph.nodeThreeObject());
+            }
 
             // Animer grafen litt ved start
             setTimeout(() => {
@@ -266,6 +373,9 @@
                     1000
                 );
             };
+            
+            // Make clearHighlight globally available
+            window.clearHighlight = clearHighlight;
         }
 
         // Start lasting av datasett når siden er lastet
