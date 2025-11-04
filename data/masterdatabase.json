@@ -1,0 +1,342 @@
+{
+  "nodes": [
+    {
+      "id": "kommune",
+      "group": 1,
+      "description": "Kommune (PK: kommune_id, UK: kommunenr). Fra Matrikkel. Rot for administrativ inndeling."
+    },
+    {
+      "id": "bydel",
+      "group": 1,
+      "description": "Bydel (PK: bydel_id, FK: kommune_id). Administrativ underenhet av kommune."
+    },
+    {
+      "id": "matrikkelenhet",
+      "group": 1,
+      "description": "Matrikkelenhet (PK: enhet_id). Grunneiendom, festenr, seksjonsnr, anleggsnr. Fra Matrikkel."
+    },
+    {
+      "id": "bygning_matrikkelenhet",
+      "group": 1,
+      "description": "Bygning-Matrikkelenhet (PK: bygg_id+enhet_id). M:N kobling med rolle og dekningsgrad."
+    },
+    {
+      "id": "gate",
+      "group": 1,
+      "description": "Gate (PK: gate_id, FK: kommunenr). Gatenavn for adressering."
+    },
+    {
+      "id": "bygning",
+      "group": 2,
+      "description": "Bygning (PK: bygg_id, UK: bygningsnr, FK: bydel_id). Bygningstype, BRA, geometri, byggeår."
+    },
+    {
+      "id": "adresse",
+      "group": 2,
+      "description": "Adresse (PK: adresse_id, FK: bygg_id/bruksenhet_id/uteomraade_id/gate_id). Husnr, postnummer, lat/lon."
+    },
+    {
+      "id": "floy",
+      "group": 3,
+      "description": "Fløy (PK: floy_id, FK: bygg_id). Bygningsfløy med navn og beskrivelse."
+    },
+    {
+      "id": "etasje",
+      "group": 3,
+      "description": "Etasje (PK: etasje_id, FK: bygg_id). Etasjenummer, betegnelse, areal."
+    },
+    {
+      "id": "bruksenhet",
+      "group": 3,
+      "description": "Bruksenhet (PK: bruksenhet_id, FK: matrikkelenhet_id/bygg_id/etasje_id). Snr, brukstype, areal."
+    },
+    {
+      "id": "rom",
+      "group": 3,
+      "description": "Rom (PK: rom_id, FK: bruksenhet_id/etasje_id/floy_id). Romnummer, navn, areal."
+    },
+    {
+      "id": "uteomraade_type",
+      "group": 4,
+      "description": "Uteområde-type (PK: type_id, UK: kode). Klassifisering av uteområder (park, plass, etc.)."
+    },
+    {
+      "id": "uteomraade",
+      "group": 4,
+      "description": "Uteområde (PK: uteomraade_id, FK: matrikkelenhet_id/bydel_id/type_id). Navn, areal, geometri."
+    },
+    {
+      "id": "adkomstpunkt",
+      "group": 4,
+      "description": "Adkomstpunkt (PK: adkomstpunkt_id, FK: uteomraade_id/gate_id). Inngang/utgang med lat/lon."
+    },
+    {
+      "id": "flate",
+      "group": 5,
+      "description": "Flate (PK: flate_id, FK: rom_id/uteomraade_id). Generell flatemodell: idrettsbaner, gulv, etc. Geometri, type."
+    },
+    {
+      "id": "flate_rel_aggregates",
+      "group": 5,
+      "description": "Flate-aggregeringer (PK: parent_flate_id+child_flate_id). Hierarki av flater, rolle, dekning%."
+    },
+    {
+      "id": "flate_classification",
+      "group": 5,
+      "description": "Flate-klassifisering (PK: flate_id+class_id). NS 3451/3457 kobling."
+    },
+    {
+      "id": "ressurs",
+      "group": 6,
+      "description": "Ressurs (PK: ressurs_id, FK: ifc_product_id/flate_id). Bookbar ressurs. Type, navn, metadata. 1:1 med flate via UX."
+    },
+    {
+      "id": "ressurspool",
+      "group": 6,
+      "description": "Ressurspool (PK: pool_id, FK: kommune_id). Pool av likartede ressurser med metadata."
+    },
+    {
+      "id": "ressurspool_medlem",
+      "group": 6,
+      "description": "Ressurspool-medlem (PK: pool_id+ressurs_id). M:N: ressurs i pool, rolle, prioritet, gyldighet."
+    },
+    {
+      "id": "fagsystem",
+      "group": 7,
+      "description": "Fagsystem (PK: fagsystem_id). Definisjon av fagsystem-type (booking, FDV, sensor)."
+    },
+    {
+      "id": "fagsystem_instans",
+      "group": 7,
+      "description": "Fagsystem-instans (PK: instans_id, FK: fagsystem_id/kommune_id). Kommune-spesifikk instans med base_url, config."
+    },
+    {
+      "id": "ressurslenke",
+      "group": 7,
+      "description": "Ressurslenke (PK: ressurslenke_id, FK: fagsystem_instans_id/bygg_id/rom_id/uteomraade_id/product_id/ressurs_id). Kontekstbasert ruting. CHECK: nøyaktig én subject-FK. UK per (kontekst, instans, subject)."
+    },
+    {
+      "id": "ifc_type",
+      "group": 8,
+      "description": "IFC-type (PK: type_id, UK: ifc_guid). Type-definisjon fra BIM: entity, predefined_type, properties."
+    },
+    {
+      "id": "ifc_product",
+      "group": 8,
+      "description": "IFC-produkt (PK: product_id, UK: ifc_guid, FK: type_id). Bygningskomponent: entity, tag, serial_no, geometri, properties."
+    },
+    {
+      "id": "ifc_product_location",
+      "group": 8,
+      "description": "IFC-produkt-lokasjon (PK: product_id, FK: bygg_id/floy_id/etasje_id/rom_id/uteomraade_id). 1:1 plassering av produkt."
+    },
+    {
+      "id": "ifc_system",
+      "group": 8,
+      "description": "IFC-system (PK: system_id). Teknisk system (HVAC, elektrisk, etc.) med type og beskrivelse."
+    },
+    {
+      "id": "ifc_product_system",
+      "group": 8,
+      "description": "IFC-produkt-system (PK: product_id+system_id). M:N: produkter i system med rolle."
+    },
+    {
+      "id": "ifc_rel_aggregates",
+      "group": 8,
+      "description": "IFC-rel-aggregates (PK: parent_product_id+child_product_id). Hierarki av produkter med rolle."
+    },
+    {
+      "id": "ifc_property_set",
+      "group": 8,
+      "description": "IFC-property-set (PK: pset_id). Property-set definisjon (Pset_WallCommon, etc.)."
+    },
+    {
+      "id": "ifc_property",
+      "group": 8,
+      "description": "IFC-property (PK: property_id, FK: pset_id/product_id). Egenskaper: navn, verdi (text/num/json)."
+    },
+    {
+      "id": "classification",
+      "group": 9,
+      "description": "Classification (PK: class_id). Klassifikasjonssystem: scheme (NS3451), code, title."
+    },
+    {
+      "id": "product_classification",
+      "group": 9,
+      "description": "Product-classification (PK: product_id+class_id). M:N: IFC-produkt til klassifikasjon."
+    },
+    {
+      "id": "Matrikkel-kilde",
+      "group": 10,
+      "description": "Ekstern datakilde: Matrikkel. ETL-prosess synkroniserer kommune, bygning, adresse, matrikkelenhet."
+    },
+    {
+      "id": "Anleggsregisteret-kilde",
+      "group": 10,
+      "description": "Ekstern datakilde: Nasjonalt anleggsregister. Synkroniserer flater/baner og ressurser."
+    },
+    {
+      "id": "Aktivkommune-kilde",
+      "group": 10,
+      "description": "Ekstern datakilde: Lokale driftsdatabaser. Synkroniserer ressurser og driftsdata."
+    },
+    {
+      "id": "ETL-prosess",
+      "group": 11,
+      "description": "ETL-prosess (Extract-Transform-Load). Synkroniserer data fra Matrikkel, Anleggsregister, Aktivkommune."
+    },
+    {
+      "id": "Proveniens",
+      "group": 11,
+      "description": "Proveniens-metrikk: kilde, ekstern_id, kilde_ref, sist_oppdatert, autoritativ. Sporer datakilde."
+    },
+    {
+      "id": "Autoritetsstyring",
+      "group": 11,
+      "description": "Autoritetsstyring: regler per felt. Matrikkel > lokale kilder for eiendomsidentitet."
+    },
+    {
+      "id": "Spatial-DB",
+      "group": 11,
+      "description": "Spatial database (PostGIS). Geometri (geom_wkt), lat/lon, SRID. Kartbasert søk."
+    },
+    {
+      "id": "Versjonering",
+      "group": 11,
+      "description": "Versjonering av bygningsdata: created_at, updated_at. Sporer endringer over tid."
+    },
+    {
+      "id": "Intern-API",
+      "group": 12,
+      "description": "Intern API: synkronisering med lokale systemer (Aktivkommune). Push/pull metadata."
+    },
+    {
+      "id": "Ekstern-API",
+      "group": 12,
+      "description": "Ekstern API: integrasjon mot registre (Matrikkel, Anleggsregister). Forespørsler fra eksterne."
+    },
+    {
+      "id": "ENØK-Kalender",
+      "group": 13,
+      "description": "ENØK-integrasjon: kalendersystem for energistyring. Synkroniserer bookinger."
+    },
+    {
+      "id": "SD-Anlegg",
+      "group": 13,
+      "description": "SD-Anlegg integrasjon: tekniske anlegg og IFC-produkter."
+    },
+    {
+      "id": "Master-UI",
+      "group": 14,
+      "description": "Master-UI: hovedgrensesnitt for masterdatabasen. Viser bygninger, ressurser, status."
+    },
+    {
+      "id": "Søk-UI",
+      "group": 14,
+      "description": "Søk-UI: kartbasert og tematisk søk. Spatial queries, filter på type/kommune."
+    },
+    {
+      "id": "Sikkerhet",
+      "group": 15,
+      "description": "Sikkerhet: rollebasert tilgangskontroll, audit-logging, godkjenninger."
+    }
+  ],
+  "links": [
+    { "source": "Matrikkel-kilde", "target": "kommune", "value": 3 },
+    { "source": "Matrikkel-kilde", "target": "matrikkelenhet", "value": 3 },
+    { "source": "Matrikkel-kilde", "target": "bygning", "value": 3 },
+    { "source": "Matrikkel-kilde", "target": "gate", "value": 2 },
+    { "source": "Matrikkel-kilde", "target": "adresse", "value": 2 },
+    { "source": "Matrikkel-kilde", "target": "bruksenhet", "value": 2 },
+    { "source": "Aktivkommune-kilde", "target": "ressurs", "value": 2 },
+    { "source": "Aktivkommune-kilde", "target": "flate", "value": 2 },
+    { "source": "Anleggsregisteret-kilde", "target": "flate", "value": 2 },
+    { "source": "Anleggsregisteret-kilde", "target": "ressurs", "value": 1 },
+    { "source": "ETL-prosess", "target": "Matrikkel-kilde", "value": 2 },
+    { "source": "ETL-prosess", "target": "Anleggsregisteret-kilde", "value": 1 },
+    { "source": "ETL-prosess", "target": "Aktivkommune-kilde", "value": 1 },
+    { "source": "Proveniens", "target": "kommune", "value": 1 },
+    { "source": "Proveniens", "target": "bygning", "value": 1 },
+    { "source": "Proveniens", "target": "matrikkelenhet", "value": 1 },
+    { "source": "Proveniens", "target": "adresse", "value": 1 },
+    { "source": "Proveniens", "target": "flate", "value": 1 },
+    { "source": "Proveniens", "target": "ressurs", "value": 1 },
+    { "source": "Proveniens", "target": "ifc_product", "value": 1 },
+    { "source": "Autoritetsstyring", "target": "Proveniens", "value": 2 },
+    { "source": "Matrikkel-kilde", "target": "Autoritetsstyring", "value": 3 },
+    { "source": "kommune", "target": "bydel", "value": 2 },
+    { "source": "kommune", "target": "gate", "value": 1 },
+    { "source": "kommune", "target": "ressurspool", "value": 1 },
+    { "source": "kommune", "target": "fagsystem_instans", "value": 1 },
+    { "source": "bydel", "target": "bygning", "value": 3 },
+    { "source": "bydel", "target": "uteomraade", "value": 2 },
+    { "source": "matrikkelenhet", "target": "bygning_matrikkelenhet", "value": 2 },
+    { "source": "matrikkelenhet", "target": "bruksenhet", "value": 2 },
+    { "source": "matrikkelenhet", "target": "uteomraade", "value": 1 },
+    { "source": "matrikkelenhet", "target": "adresse", "value": 1 },
+    { "source": "bygning", "target": "bygning_matrikkelenhet", "value": 2 },
+    { "source": "bygning", "target": "floy", "value": 2 },
+    { "source": "bygning", "target": "etasje", "value": 2 },
+    { "source": "bygning", "target": "bruksenhet", "value": 2 },
+    { "source": "bygning", "target": "adresse", "value": 1 },
+    { "source": "bygning", "target": "Spatial-DB", "value": 2 },
+    { "source": "bygning", "target": "ressurslenke", "value": 1 },
+    { "source": "floy", "target": "rom", "value": 2 },
+    { "source": "etasje", "target": "rom", "value": 3 },
+    { "source": "etasje", "target": "bruksenhet", "value": 1 },
+    { "source": "bruksenhet", "target": "rom", "value": 2 },
+    { "source": "bruksenhet", "target": "adresse", "value": 1 },
+    { "source": "bruksenhet", "target": "ressurslenke", "value": 1 },
+    { "source": "rom", "target": "flate", "value": 2 },
+    { "source": "rom", "target": "ifc_product_location", "value": 1 },
+    { "source": "rom", "target": "ressurslenke", "value": 1 },
+    { "source": "gate", "target": "adresse", "value": 2 },
+    { "source": "gate", "target": "adkomstpunkt", "value": 1 },
+    { "source": "uteomraade_type", "target": "uteomraade", "value": 1 },
+    { "source": "uteomraade", "target": "flate", "value": 2 },
+    { "source": "uteomraade", "target": "adresse", "value": 1 },
+    { "source": "uteomraade", "target": "adkomstpunkt", "value": 1 },
+    { "source": "uteomraade", "target": "ifc_product_location", "value": 1 },
+    { "source": "uteomraade", "target": "ressurslenke", "value": 1 },
+    { "source": "uteomraade", "target": "Spatial-DB", "value": 2 },
+    { "source": "flate", "target": "flate_rel_aggregates", "value": 1 },
+    { "source": "flate", "target": "flate_classification", "value": 1 },
+    { "source": "flate", "target": "ressurs", "value": 2 },
+    { "source": "flate", "target": "Spatial-DB", "value": 1 },
+    { "source": "classification", "target": "flate_classification", "value": 1 },
+    { "source": "classification", "target": "product_classification", "value": 1 },
+    { "source": "ressurs", "target": "ressurspool_medlem", "value": 2 },
+    { "source": "ressurs", "target": "ressurslenke", "value": 3 },
+    { "source": "ressurspool", "target": "ressurspool_medlem", "value": 2 },
+    { "source": "fagsystem", "target": "fagsystem_instans", "value": 2 },
+    { "source": "fagsystem_instans", "target": "ressurslenke", "value": 3 },
+    { "source": "ressurslenke", "target": "Intern-API", "value": 1 },
+    { "source": "ressurslenke", "target": "Master-UI", "value": 1 },
+    { "source": "ifc_type", "target": "ifc_product", "value": 2 },
+    { "source": "ifc_product", "target": "ifc_product_location", "value": 2 },
+    { "source": "ifc_product", "target": "ifc_product_system", "value": 1 },
+    { "source": "ifc_product", "target": "ifc_rel_aggregates", "value": 1 },
+    { "source": "ifc_product", "target": "product_classification", "value": 1 },
+    { "source": "ifc_product", "target": "ifc_property", "value": 1 },
+    { "source": "ifc_product", "target": "ressurs", "value": 1 },
+    { "source": "ifc_product", "target": "ressurslenke", "value": 1 },
+    { "source": "ifc_system", "target": "ifc_product_system", "value": 1 },
+    { "source": "ifc_property_set", "target": "ifc_property", "value": 1 },
+    { "source": "Spatial-DB", "target": "Søk-UI", "value": 3 },
+    { "source": "Intern-API", "target": "Aktivkommune-kilde", "value": 2 },
+    { "source": "Ekstern-API", "target": "Matrikkel-kilde", "value": 2 },
+    { "source": "Ekstern-API", "target": "Anleggsregisteret-kilde", "value": 1 },
+    { "source": "ENØK-Kalender", "target": "ressurs", "value": 2 },
+    { "source": "SD-Anlegg", "target": "ifc_product", "value": 2 },
+    { "source": "Søk-UI", "target": "Master-UI", "value": 2 },
+    { "source": "Master-UI", "target": "bygning", "value": 1 },
+    { "source": "Master-UI", "target": "ressurs", "value": 1 },
+    { "source": "Master-UI", "target": "flate", "value": 1 },
+    { "source": "Sikkerhet", "target": "Intern-API", "value": 2 },
+    { "source": "Sikkerhet", "target": "Ekstern-API", "value": 2 },
+    { "source": "Sikkerhet", "target": "Master-UI", "value": 2 },
+    { "source": "Versjonering", "target": "bygning", "value": 1 },
+    { "source": "Versjonering", "target": "ressurs", "value": 1 },
+    { "source": "Versjonering", "target": "flate", "value": 1 }
+  ]
+}

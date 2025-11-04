@@ -1,0 +1,115 @@
+{
+  "nodes": [
+    {
+      "id": "Innbygger",
+      "group": 1,
+      "description": "Innbyggere kan søke lokaler og utstyr, sende søknader, se ledig tid, avbestille og få oversikt via 'Min side'."
+    },
+    {
+      "id": "Administrator",
+      "group": 1,
+      "description": "Administrerer søknader, tildeler faste tider, planlegger sesonger, og styrer åpningstider og sesong."
+    },
+    {
+      "id": "Organisasjon",
+      "group": 1,
+      "description": "Organisasjoner søker om faste treningstider, har oversikt over frivillige og ledere, og fordeler tildelt tid."
+    },
+    {
+      "id": "Søknad",
+      "group": 2,
+      "description": "Søknadsprosessen inkluderer automatisk og manuell behandling, kommunikasjon med søker og journalføring."
+    },
+    {
+      "id": "Kalender",
+      "group": 2,
+      "description": "Kalenderen viser tilgjengelighet, støtter uke- og dagsvisning, serier og sesonger, og sjekker konflikter."
+    },
+    {
+      "id": "Min Side",
+      "group": 2,
+      "description": "Personlig oversikt for innbyggere og organisasjoner med status på søknader, bestillinger og faktura."
+    },
+    {
+      "id": "Outlook",
+      "group": 2,
+      "description": "Outlook-integrasjon lar brukere booke rom direkte, synkronisere opptatt-status og unngå dobbeltbooking."
+    },
+    {
+      "id": "Smartstyring",
+      "group": 3,
+      "description": "Automatisert styring av lys, varme og ventilasjon basert på booking. Reduserer energibruk og gir hallmonitorering."
+    },
+    {
+      "id": "Låsesystemer",
+      "group": 3,
+      "description": "Støtter ARX, OMNIS, SALTO, med symmetri, Oslonøkkel og tidsstyrte åpninger."
+    },
+    {
+      "id": "Økonomi",
+      "group": 4,
+      "description": "Støtter Vippsbetaling, fakturamottak, journalføring og integrasjon med Visma og Agresso."
+    },
+    {
+      "id": "Visma",
+      "group": 4,
+      "description": "Økonomisystem integrert med Aktiv Kommune for fakturering og betaling."
+    },
+    {
+      "id": "Agresso",
+      "group": 4,
+      "description": "Økonomisystem integrert med Aktiv Kommune for journalføring og fakturahåndtering."
+    },
+    {
+      "id": "API",
+      "group": 5,
+      "description": "Åpne REST-endepunkter, webhooks og standard filformater for enkel integrasjon med eksterne systemer."
+    },
+    {
+      "id": "Federering",
+      "group": 5,
+      "description": "Støtter Entra ID, OpenID Connect, ID-porten og Passkeys for sikker autentisering og single sign-on."
+    },
+    {
+      "id": "Informasjonssikkerhet",
+      "group": 6,
+      "description": "ROS-analyse, databehandleravtale, tilgangsstyring, tofaktorautentisering og GDPR-samsvar."
+    },
+    {
+      "id": "GDPR",
+      "group": 6,
+      "description": "Lovlig grunnlag for databehandling, med fokus på sikker lagring og tilgangsstyring."
+    },
+    {
+      "id": "Bærekraft",
+      "group": 7,
+      "description": "Redusert behov for nybygg, mer delt bruk av bygg, lavere energibruk og samfunnsnytte."
+    },
+    {
+      "id": "Brukersentrert",
+      "group": 8,
+      "description": "Utvikling basert på behov, tett dialog med saksbehandlere og adminbrukere, og deling av beste praksis."
+    },
+    {
+      "id": "Design/UU",
+      "group": 8,
+      "description": "Basert på Digdir designsystem, tilfredsstiller WCAG-krav, og gir enhetlig UX og tilgjengelighetserklæring."
+    }
+  ],
+  "links": [
+    { "source": "Innbygger", "target": "Søknad", "value": 1 },
+    { "source": "Administrator", "target": "Søknad", "value": 1 },
+    { "source": "Administrator", "target": "Kalender", "value": 1 },
+    { "source": "Organisasjon", "target": "Kalender", "value": 1 },
+    { "source": "Innbygger", "target": "Min Side", "value": 1 },
+    { "source": "Outlook", "target": "Kalender", "value": 1 },
+    { "source": "Smartstyring", "target": "Låsesystemer", "value": 1 },
+    { "source": "Smartstyring", "target": "Bærekraft", "value": 1 },
+    { "source": "Økonomi", "target": "Visma", "value": 1 },
+    { "source": "Økonomi", "target": "Agresso", "value": 1 },
+    { "source": "API", "target": "Federering", "value": 1 },
+    { "source": "Informasjonssikkerhet", "target": "GDPR", "value": 1 },
+    { "source": "Brukersentrert", "target": "Design/UU", "value": 1 },
+    { "source": "Administrator", "target": "Informasjonssikkerhet", "value": 1 }
+  ]
+}

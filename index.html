@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Visualisering av sammenhenger</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+        }
+        #graph-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            font-size: 12px;
+        }
+        #info h3 {
+            margin-top: 0;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="graph-container"></div>
+    <div id="info">
+        <h3>Ecosystem 3D Graf</h3>
+        <p>Klikk og dra for å rotere</p>
+        <p>Scroll for å zoome</p>
+        <p>Klikk på en node for detaljer</p>
+    </div>
+    <div id="controls">
+        <label for="datasetSelect" style="display: block; margin-bottom: 5px;">Velg datasett:</label>
+        <select id="datasetSelect" onchange="loadSelectedDataset()" style="width: 200px; margin-bottom: 10px;">
+            <option value="">Laster...</option>
+        </select>
+        <br>
+        <button onclick="resetCamera()">Reset Kamera</button>
+    </div>
+
+    <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+
+    <script>
+        // Last inn datasettet fra ekstern fil
+        let data = null;
+        let Graph = null;
+        let availableDatasets = [];
+
+        // Funksjon for å hente tilgjengelige datasett
+        async function loadAvailableDatasets() {
+            try {
+                const response = await fetch('data/datasets.json');
+                availableDatasets = await response.json();
+                
+                const select = document.getElementById('datasetSelect');
+                select.innerHTML = '';
+                
+                availableDatasets.forEach((dataset, index) => {
+                    const option = document.createElement('option');
+                    option.value = dataset.file;
+                    option.textContent = dataset.name;
+                    if (index === 0) option.selected = true;
+                    select.appendChild(option);
+                });
+                
+                // Last inn første datasett
+                if (availableDatasets.length > 0) {
+                    await loadDatasetFile(availableDatasets[0].file);
+                }
+            } catch (error) {
+                console.error('Kunne ikke laste datasett-liste:', error);
+                // Fallback til default fil
+                await loadDatasetFile('ecosystem.js');
+                const select = document.getElementById('datasetSelect');
+                select.innerHTML = '<option value="ecosystem.js">ecosystem.js</option>';
+            }
+        }
+
+        // Funksjon for å laste et datasett fra fil
+        async function loadDatasetFile(filename) {
+            try {
+                const path = filename.includes('/') ? filename : `data/${filename}`;
+                const response = await fetch(path);
+                data = await response.json();
+                
+                if (Graph) {
+                    // Oppdater eksisterende graf
+                    Graph.graphData(data);
+                } else {
+                    // Initialiser graf første gang
+                    initializeGraph();
+                }
+                
+                document.getElementById('info').innerHTML = `
+                    <h3>Ecosystem 3D Graf</h3>
+                    <p><strong>Datasett:</strong> ${filename}</p>
+                    <p><strong>Noder:</strong> ${data.nodes.length}</p>
+                    <p><strong>Lenker:</strong> ${data.links.length}</p>
+                    <p>Klikk på en node for detaljer</p>
+                `;
+            } catch (error) {
+                console.error('Feil ved lasting av data:', error);
+                document.getElementById('info').innerHTML = `
+                    <h3>Feil</h3>
+                    <p>Kunne ikke laste ${filename}</p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        // Funksjon som kalles når bruker velger et nytt datasett
+        function loadSelectedDataset() {
+            const select = document.getElementById('datasetSelect');
+            const selectedFile = select.value;
+            if (selectedFile) {
+                loadDatasetFile(selectedFile);
+            }
+        }
+
+        function initializeGraph() {
+            if (!data) return;
+
+            // Fargepalett for gruppene
+            const groupColors = {
+                1: '#FF6B6B',  // Aktører (rød)
+                2: '#4ECDC4',  // Funksjoner (turkis)
+                3: '#45B7D1',  // Teknologi (blå)
+                4: '#96CEB4',  // Økonomi (grønn)
+                5: '#FFEAA7',  // Integrasjon (gul)
+                6: '#DFE6E9',  // Sikkerhet (grå)
+                7: '#55EFC4',  // Bærekraft (mintgrønn)
+                8: '#A29BFE'   // Design (lilla)
+            };
+
+            // Opprett 3D graf
+            Graph = ForceGraph3D()
+                (document.getElementById('graph-container'))
+                .graphData(data)
+                .nodeLabel('id')
+                .nodeAutoColorBy('group')
+                .nodeColor(node => groupColors[node.group] || '#cccccc')
+                .nodeRelSize(8)
+                .nodeOpacity(0.9)
+                .nodeThreeObject(node => {
+                    // Hent THREE fra global scope
+                    const THREE = window.THREE;
+                    
+                    // Lag en gruppe for node med tekst
+                    const group = new THREE.Group();
+                    
+                    // Lag sfære for noden
+                    const sphereGeometry = new THREE.SphereGeometry(8);
+                    const sphereMaterial = new THREE.MeshLambertMaterial({
+                        color: groupColors[node.group] || '#cccccc',
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                    group.add(sphere);
+                    
+                    // Lag tekst for nodenavn
+                    const sprite = new THREE.Sprite(
+                        new THREE.SpriteMaterial({
+                            map: createTextTexture(node.id),
+                            transparent: true,
+                            depthTest: false,
+                            depthWrite: false
+                        })
+                    );
+                    sprite.position.y = 15;
+                    sprite.scale.set(30, 10, 1);
+                    sprite.renderOrder = 999;
+                    group.add(sprite);
+                    
+                    return group;
+                })
+                .linkColor(() => 'rgba(255,255,255,0.6)')
+                .linkWidth(1)
+                .linkOpacity(0.6)
+                .onNodeClick(node => {
+                    // Oppdater info-panelet
+                    document.getElementById('info').innerHTML = `
+                        <h3>${node.id}</h3>
+                        <p><strong>Gruppe:</strong> ${node.group}</p>
+                        <p>${node.description}</p>
+                    `;
+                    
+                    // Flytt kameraet for å fokusere på noden
+                    const distance = 200;
+                    const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                    
+                    Graph.cameraPosition(
+                        { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // ny kameraposisjon
+                        node, // se mot noden
+                        1000  // animasjonstid i ms
+                    );
+                })
+                .backgroundColor('#000000');
+            
+            // Funksjon for å lage tekst-tekstur
+            function createTextTexture(text) {
+                const THREE = window.THREE;
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 256;
+                canvas.height = 64;
+                
+                // Ingen bakgrunn - transparent
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Tekst med skygge for bedre lesbarhet
+                context.font = 'Bold 18px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                
+                // Skygge/outline
+                context.strokeStyle = 'black';
+                context.lineWidth = 3;
+                context.strokeText(text, canvas.width / 2, canvas.height / 2);
+                
+                // Hovedtekst
+                context.fillStyle = 'white';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                
+                const texture = new THREE.Texture(canvas);
+                texture.needsUpdate = true;
+                return texture;
+            }
+
+            // Animer grafen litt ved start
+            setTimeout(() => {
+                Graph.cameraPosition(
+                    { x: 200, y: 200, z: 600 },
+                    { x: 0, y: 0, z: 0 },
+                    3000
+                );
+            }, 1000);
+
+            // Kamera kontroll funksjon (globalt tilgjengelig)
+            window.resetCamera = function() {
+                Graph.cameraPosition(
+                    { x: 0, y: 0, z: 1000 },
+                    { x: 0, y: 0, z: 0 },
+                    1000
+                );
+            };
+        }
+
+        // Start lasting av datasett når siden er lastet
+        loadAvailableDatasets();
+    </script>
+</body>
+</html>

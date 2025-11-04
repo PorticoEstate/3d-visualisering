@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Ecosystem (Standard)",
+    "file": "ecosystem.json"
+  },
+  {
+    "name": "Masterdatabase",
+    "file": "masterdatabase.json"
+  }
+]
