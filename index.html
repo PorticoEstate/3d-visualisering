@@ -72,6 +72,7 @@
         let highlightNodes = new Set();
         let highlightLinks = new Set();
         let hoverNode = null;
+        let nodeDistances = new Map(); // For storing distance from selected node
 
         // Funksjon for å hente tilgjengelige datasett
         async function loadAvailableDatasets() {
@@ -175,26 +176,60 @@
                     // Lag en gruppe for node med tekst
                     const group = new THREE.Group();
                     
-                    // Bestem farge og opacity basert på highlighting
+                    // Bestem farge, størrelse og opacity basert på distance
                     let nodeColor = groupColors[node.group] || '#cccccc';
                     let nodeOpacity = 0.9;
+                    let nodeSize = 8;
                     
                     if (highlightNodes.size > 0) {
                         if (!highlightNodes.has(node)) {
-                            nodeOpacity = 0.3;
+                            nodeOpacity = 0.2;
+                            nodeSize = 6;
                         } else {
-                            nodeOpacity = 1.0;
+                            const distance = nodeDistances.get(node) || nodeDistances.get(node.id) || 0;
+                            
+                            if (distance === 0) {
+                                // Selected node - largest and brightest
+                                nodeColor = '#ffffff';
+                                nodeOpacity = 1.0;
+                                nodeSize = 12;
+                            } else if (distance === 1) {
+                                // 1 hop - bright and larger
+                                nodeOpacity = 1.0;
+                                nodeSize = 10;
+                            } else if (distance === 2) {
+                                // 2 hops - normal size, good opacity
+                                nodeOpacity = 0.9;
+                                nodeSize = 8;
+                            } else {
+                                // 3+ hops - smaller and more transparent
+                                nodeOpacity = 0.7;
+                                nodeSize = 7;
+                            }
                         }
                     }
                     
                     // Lag sfære for noden
-                    const sphereGeometry = new THREE.SphereGeometry(8);
+                    const sphereGeometry = new THREE.SphereGeometry(nodeSize);
                     const sphereMaterial = new THREE.MeshLambertMaterial({
                         color: nodeColor,
                         transparent: true,
                         opacity: nodeOpacity
                     });
                     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                    
+                    // Add glow effect for selected node
+                    if (highlightNodes.has(node) && (nodeDistances.get(node) || nodeDistances.get(node.id) || 0) === 0) {
+                        const glowGeometry = new THREE.SphereGeometry(nodeSize * 1.5);
+                        const glowMaterial = new THREE.MeshLambertMaterial({
+                            color: '#ffffff',
+                            transparent: true,
+                            opacity: 0.3
+                        });
+                        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                        group.add(glow);
+                    }
+                    
                     group.add(sphere);
                     
                     // Lag tekst for nodenavn
@@ -206,34 +241,90 @@
                             depthWrite: false
                         })
                     );
-                    sprite.position.y = 15;
+                    sprite.position.y = nodeSize + 7;
                     sprite.scale.set(30, 10, 1);
                     sprite.renderOrder = 999;
                     
                     // Juster tekst opacity basert på highlighting
-                    sprite.material.opacity = highlightNodes.size === 0 || highlightNodes.has(node) ? 1.0 : 0.3;
+                    sprite.material.opacity = highlightNodes.size === 0 || highlightNodes.has(node) ? 1.0 : 0.2;
                     
                     group.add(sprite);
                     
                     return group;
                 })
-                .linkColor(link => highlightLinks.has(link) ? '#ff6b6b' : 'rgba(255,255,255,0.6)')
-                .linkWidth(link => highlightLinks.has(link) ? 3 : 1)
-                .linkOpacity(link => highlightLinks.has(link) ? 1 : 0.6)
+                .linkColor(link => {
+                    if (highlightLinks.size === 0) {
+                        return 'rgba(255,255,255,0.6)';
+                    }
+                    if (highlightLinks.has(link)) {
+                        // Get distance from source node to create gradient effect
+                        const sourceDistance = nodeDistances.get(link.source) || nodeDistances.get(link.source.id) || 0;
+                        const targetDistance = nodeDistances.get(link.target) || nodeDistances.get(link.target.id) || 0;
+                        const maxDistance = Math.max(sourceDistance, targetDistance);
+                        
+                        // Create color gradient from red (close) to blue (far)
+                        if (maxDistance === 0) return '#ff3333'; // Selected node links - bright red
+                        if (maxDistance === 1) return '#ff6666'; // 1 hop - red
+                        if (maxDistance === 2) return '#ff9999'; // 2 hops - light red
+                        if (maxDistance === 3) return '#66ccff'; // 3 hops - light blue
+                        return '#3399ff'; // 4+ hops - blue
+                    }
+                    return 'rgba(100,100,100,0.1)'; // Non-highlighted links very faded
+                })
+                .linkWidth(link => {
+                    if (highlightLinks.size === 0) {
+                        return 1;
+                    }
+                    if (highlightLinks.has(link)) {
+                        // Make links thicker for closer connections
+                        const sourceDistance = nodeDistances.get(link.source) || nodeDistances.get(link.source.id) || 0;
+                        const targetDistance = nodeDistances.get(link.target) || nodeDistances.get(link.target.id) || 0;
+                        const maxDistance = Math.max(sourceDistance, targetDistance);
+                        
+                        if (maxDistance === 0) return 4; // Selected node links - thickest
+                        if (maxDistance === 1) return 3; // 1 hop
+                        if (maxDistance === 2) return 2; // 2 hops
+                        return 1; // 3+ hops - normal width
+                    }
+                    return 0.5; // Non-highlighted links thinner
+                })
+                .linkOpacity(link => {
+                    if (highlightLinks.size === 0) {
+                        return 0.6;
+                    }
+                    if (highlightLinks.has(link)) {
+                        // Fade opacity with distance
+                        const sourceDistance = nodeDistances.get(link.source) || nodeDistances.get(link.source.id) || 0;
+                        const targetDistance = nodeDistances.get(link.target) || nodeDistances.get(link.target.id) || 0;
+                        const maxDistance = Math.max(sourceDistance, targetDistance);
+                        
+                        if (maxDistance === 0) return 1.0; // Selected node links - full opacity
+                        if (maxDistance === 1) return 0.9; // 1 hop
+                        if (maxDistance === 2) return 0.7; // 2 hops
+                        if (maxDistance === 3) return 0.5; // 3 hops
+                        return 0.3; // 4+ hops
+                    }
+                    return 0.1; // Non-highlighted links very faded
+                })
                 .onNodeClick(node => {
                     // Oppdater highlighting
                     updateHighlight(node);
                     
                     // Oppdater info-panelet
-                    const connectedNodes = getConnectedNodes(node);
+                    const totalConnected = highlightNodes.size - 1; // Subtract the clicked node itself
+                    const directConnections = getConnectedNodes(node).length - 1; // Direct connections only
+                    
                     document.getElementById('info').innerHTML = `
                         <h3>${node.id}</h3>
                         <p><strong>Gruppe:</strong> ${node.group}</p>
-                        <p><strong>Tilkoblinger:</strong> ${connectedNodes.length}</p>
+                        <p><strong>Direkte tilkoblinger:</strong> ${directConnections}</p>
+                        <p><strong>Total nettverk (4 hopp):</strong> ${totalConnected}</p>
                         <p>${node.description}</p>
                         <hr>
-                        <p style="font-size: 11px;"><strong>Klikk på en annen node for å se nye relasjoner</strong></p>
-                        <p style="font-size: 11px;"><strong>Klikk på bakgrunnen for å fjerne highlighting</strong></p>
+                        <p style="font-size: 11px;"><strong>Farger:</strong></p>
+                        <p style="font-size: 10px;">🔴 Rød: Nærme forbindelser (1-2 hopp)</p>
+                        <p style="font-size: 10px;">🔵 Blå: Fjerne forbindelser (3-4 hopp)</p>
+                        <p style="font-size: 11px;"><strong>Klikk på en annen node eller bakgrunnen</strong></p>
                     `;
                     
                     // Flytt kameraet for å fokusere på noden
@@ -261,9 +352,20 @@
                     if (highlightNodes.size === 0) {
                         return groupColors[node.group] || '#cccccc';
                     }
-                    return highlightNodes.has(node) ? 
-                        (groupColors[node.group] || '#cccccc') : 
-                        'rgba(150,150,150,0.3)';
+                    if (highlightNodes.has(node)) {
+                        // Color nodes based on distance from selected node
+                        const distance = nodeDistances.get(node) || nodeDistances.get(node.id) || 0;
+                        const baseColor = groupColors[node.group] || '#cccccc';
+                        
+                        if (distance === 0) {
+                            // Selected node - bright with white outline effect
+                            return '#ffffff';
+                        } else {
+                            // Connected nodes - keep original color but make them bright
+                            return baseColor;
+                        }
+                    }
+                    return 'rgba(100,100,100,0.2)'; // Non-connected nodes very faded
                 })
                 .backgroundColor('#000000');
             
@@ -318,22 +420,56 @@
                 // Clear previous highlights
                 highlightNodes.clear();
                 highlightLinks.clear();
+                nodeDistances.clear();
                 
                 if (node) {
-                    // Add clicked node
+                    // Use BFS to find all connected nodes and their distances
+                    const queue = [{node: node, distance: 0}];
+                    const visited = new Set();
+                    const maxDistance = 4; // Limit propagation to 4 hops
+                    
+                    visited.add(node.id || node);
+                    nodeDistances.set(node, 0);
                     highlightNodes.add(node);
                     
-                    // Add connected nodes and links
-                    data.links.forEach(link => {
-                        if (link.source === node || link.source.id === node.id) {
-                            highlightNodes.add(link.target);
-                            highlightLinks.add(link);
-                        }
-                        if (link.target === node || link.target.id === node.id) {
-                            highlightNodes.add(link.source);
-                            highlightLinks.add(link);
-                        }
-                    });
+                    while (queue.length > 0) {
+                        const {node: currentNode, distance} = queue.shift();
+                        
+                        if (distance >= maxDistance) continue;
+                        
+                        // Find all connected nodes
+                        data.links.forEach(link => {
+                            let connectedNode = null;
+                            let isConnected = false;
+                            
+                            if (link.source === currentNode || link.source.id === (currentNode.id || currentNode)) {
+                                connectedNode = link.target;
+                                isConnected = true;
+                            } else if (link.target === currentNode || link.target.id === (currentNode.id || currentNode)) {
+                                connectedNode = link.source;
+                                isConnected = true;
+                            }
+                            
+                            if (isConnected && connectedNode) {
+                                const connectedNodeId = connectedNode.id || connectedNode;
+                                
+                                // Add the link to highlighting
+                                highlightLinks.add(link);
+                                
+                                // If we haven't visited this node yet, add it
+                                if (!visited.has(connectedNodeId)) {
+                                    visited.add(connectedNodeId);
+                                    nodeDistances.set(connectedNode, distance + 1);
+                                    highlightNodes.add(connectedNode);
+                                    
+                                    // Add to queue for further exploration
+                                    if (distance + 1 < maxDistance) {
+                                        queue.push({node: connectedNode, distance: distance + 1});
+                                    }
+                                }
+                            }
+                        });
+                    }
                 }
                 
                 // Update graph display
@@ -347,6 +483,7 @@
             function clearHighlight() {
                 highlightNodes.clear();
                 highlightLinks.clear();
+                nodeDistances.clear();
                 
                 // Update graph display
                 Graph.nodeColor(Graph.nodeColor());
