@@ -2,6 +2,8 @@
 
 Et interaktivt 3D visualiseringsverktøy for å utforske sammenhenger i datasett.
 
+🌐 **Live Demo:** [https://porticoestate.github.io/3d-visualisering/](https://porticoestate.github.io/3d-visualisering/)
+
 ## Beskrivelse
 
 Dette prosjektet tilbyr en 3D grafisk representasjon av data hvor brukere kan:
@@ -19,6 +21,12 @@ Dette prosjektet tilbyr en 3D grafisk representasjon av data hvor brukere kan:
   - `masterdatabase.json` - Hoveddatabase
 
 ## Hvordan bruke
+
+### Online (anbefalt)
+
+Besøk den live demoen: [https://porticoestate.github.io/3d-visualisering/](https://porticoestate.github.io/3d-visualisering/)
+
+### Lokalt
 
 1. Åpne `index.html` i en moderne nettleser
 2. Bruk musen til å navigere i 3D-rommet:
