@@ -21,9 +21,29 @@
       "description": "Søknadsprosessen inkluderer automatisk og manuell behandling, kommunikasjon med søker og journalføring."
     },
     {
+      "id": "Booking",
+      "group": 2,
+      "description": "Hendelse/avtale/arrangement avgrenset i tid. Relateres til en ressurs organisert innenfor bygg."
+    },
+    {
+      "id": "Ressurs",
+      "group": 2,
+      "description": "Lokaler og utstyr som kan bookes. Organisert innenfor bygg, koplet til kalender og låsesystemer."
+    },
+    {
+      "id": "Bygg",
+      "group": 2,
+      "description": "Fysiske bygg som inneholder ressurser. Administrator/saksbehandler har ansvar for sine bygg."
+    },
+    {
       "id": "Kalender",
       "group": 2,
-      "description": "Kalenderen viser tilgjengelighet, støtter uke- og dagsvisning, serier og sesonger, og sjekker konflikter."
+      "description": "Kalenderen viser tilgjengelighet for ressurser, støtter uke- og dagsvisning, serier og sesonger, og sjekker konflikter."
+    },
+    {
+      "id": "Sesong",
+      "group": 2,
+      "description": "Tidsperioder som organiserer tilgjengelig tid i kalender per ressurs. Administrator planlegger sesonger."
     },
     {
       "id": "Min Side",
@@ -44,6 +64,21 @@
       "id": "Låsesystemer",
       "group": 3,
       "description": "Støtter ARX, OMNIS, SALTO, med symmetri, Oslonøkkel og tidsstyrte åpninger."
+    },
+    {
+      "id": "SMS",
+      "group": 3,
+      "description": "SMS-varslinger med koder for å åpne låsesystemer sendes til innbyggere."
+    },
+    {
+      "id": "Artikkel",
+      "group": 4,
+      "description": "Tilleggstjenester som kan legges til booking. Artikler har priser og inkluderes i faktura."
+    },
+    {
+      "id": "Faktura",
+      "group": 4,
+      "description": "Faktura genereres fra booking og overføres til økonomisystemet for betaling og journalføring."
     },
     {
       "id": "Økonomi",
@@ -69,6 +104,46 @@
       "id": "Federering",
       "group": 5,
       "description": "Støtter Entra ID, OpenID Connect, ID-porten og Passkeys for sikker autentisering og single sign-on."
+    },
+    {
+      "id": "Entra ID",
+      "group": 5,
+      "description": "Microsoft Entra ID (tidligere Azure AD) for organisasjonsautentisering og identitetshåndtering."
+    },
+    {
+      "id": "OpenID Connect",
+      "group": 5,
+      "description": "Standard protokoll for autentisering og autorisasjon via OAuth 2.0."
+    },
+    {
+      "id": "ID-porten",
+      "group": 5,
+      "description": "Nasjonal løsning for sikker pålogging til offentlige tjenester med BankID, MinID etc."
+    },
+    {
+      "id": "Passkeys",
+      "group": 5,
+      "description": "Moderne passordløs autentisering med biometri eller PIN-kode."
+    },
+    {
+      "id": "Matrikkelen",
+      "group": 5,
+      "description": "Nasjonal database med informasjon om eiendommer, bygninger og adresser i Norge."
+    },
+    {
+      "id": "Folkeregisteret",
+      "group": 5,
+      "description": "Nasjonal database med informasjon om alle folkeregistrerte personer i Norge."
+    },
+    {
+      "id": "Reservasjonsregisteret",
+      "group": 5,
+      "description": "Register over personer som har reservert seg mot elektronisk kommunikasjon fra det offentlige."
+    },
+    {
+      "id": "Brønnøysundregistrene",
+      "group": 5,
+      "description": "Nasjonale registre for virksomheter inkludert Enhetsregisteret, Foretaksregisteret og Regnskapsregisteret."
     },
     {
       "id": "Informasjonssikkerhet",
@@ -98,18 +173,49 @@
   ],
   "links": [
     { "source": "Innbygger", "target": "Søknad", "value": 1 },
+    { "source": "Søknad", "target": "Booking", "value": 1 },
+    { "source": "Booking", "target": "Ressurs", "value": 1 },
+    { "source": "Booking", "target": "Artikkel", "value": 1 },
+    { "source": "Booking", "target": "Faktura", "value": 1 },
+    { "source": "Artikkel", "target": "Faktura", "value": 1 },
+    { "source": "Faktura", "target": "Økonomi", "value": 1 },
+    { "source": "Ressurs", "target": "Bygg", "value": 1 },
+    { "source": "Bygg", "target": "Matrikkelen", "value": 1 },
+    { "source": "Ressurs", "target": "Kalender", "value": 1 },
+    { "source": "Ressurs", "target": "Sesong", "value": 1 },
+    { "source": "Kalender", "target": "Sesong", "value": 1 },
+    { "source": "Ressurs", "target": "Låsesystemer", "value": 1 },
     { "source": "Administrator", "target": "Søknad", "value": 1 },
+    { "source": "Administrator", "target": "Bygg", "value": 1 },
     { "source": "Administrator", "target": "Kalender", "value": 1 },
+    { "source": "Administrator", "target": "Sesong", "value": 1 },
+    { "source": "Innbygger", "target": "Organisasjon", "value": 1 },
     { "source": "Organisasjon", "target": "Kalender", "value": 1 },
+    { "source": "Organisasjon", "target": "Brønnøysundregistrene", "value": 1 },
     { "source": "Innbygger", "target": "Min Side", "value": 1 },
+    { "source": "Innbygger", "target": "Folkeregisteret", "value": 1 },
+    { "source": "Innbygger", "target": "Reservasjonsregisteret", "value": 1 },
+    { "source": "Låsesystemer", "target": "SMS", "value": 1 },
+    { "source": "SMS", "target": "Innbygger", "value": 1 },
     { "source": "Outlook", "target": "Kalender", "value": 1 },
     { "source": "Smartstyring", "target": "Låsesystemer", "value": 1 },
     { "source": "Smartstyring", "target": "Bærekraft", "value": 1 },
+    { "source": "Booking", "target": "Smartstyring", "value": 1 },
     { "source": "Økonomi", "target": "Visma", "value": 1 },
     { "source": "Økonomi", "target": "Agresso", "value": 1 },
+    { "source": "Booking", "target": "API", "value": 1 },
+    { "source": "Kalender", "target": "API", "value": 1 },
     { "source": "API", "target": "Federering", "value": 1 },
+    { "source": "Federering", "target": "Entra ID", "value": 1 },
+    { "source": "Federering", "target": "OpenID Connect", "value": 1 },
+    { "source": "Federering", "target": "ID-porten", "value": 1 },
+    { "source": "Federering", "target": "Passkeys", "value": 1 },
+    { "source": "Federering", "target": "Innbygger", "value": 1 },
+    { "source": "Federering", "target": "Administrator", "value": 1 },
     { "source": "Informasjonssikkerhet", "target": "GDPR", "value": 1 },
     { "source": "Brukersentrert", "target": "Design/UU", "value": 1 },
+    { "source": "Design/UU", "target": "Min Side", "value": 1 },
+    { "source": "Design/UU", "target": "Søknad", "value": 1 },
     { "source": "Administrator", "target": "Informasjonssikkerhet", "value": 1 }
   ]
 }
