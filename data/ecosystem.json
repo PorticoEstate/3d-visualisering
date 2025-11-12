@@ -169,6 +169,46 @@
       "id": "Design/UU",
       "group": 8,
       "description": "Basert på Digdir designsystem, tilfredsstiller WCAG-krav, og gir enhetlig UX og tilgjengelighetserklæring."
+    },
+    {
+      "id": "Kommune",
+      "group": 9,
+      "description": "Hver kommune driver sin egen installasjon, men samarbeider på tvers i et fellesskap."
+    },
+    {
+      "id": "Support/Opplæring",
+      "group": 9,
+      "description": "Felles support og opplæring på tvers av kommuner. Deling av kompetanse og erfaring."
+    },
+    {
+      "id": "Utvikling",
+      "group": 9,
+      "description": "Felles utvikling av løsningen. Kommuner bidrar med behov og prioriteringer."
+    },
+    {
+      "id": "Drift",
+      "group": 9,
+      "description": "Drift av løsningen per kommune, med delt erfaring og beste praksis."
+    },
+    {
+      "id": "Brukerforum",
+      "group": 9,
+      "description": "Arena for dialog mellom brukere på tvers av kommuner. Deling av erfaringer og behov."
+    },
+    {
+      "id": "Styringsgruppe",
+      "group": 9,
+      "description": "Styringsgruppe med representanter fra kommunene. Tar strategiske beslutninger."
+    },
+    {
+      "id": "Nettverksarbeid",
+      "group": 9,
+      "description": "Formelt og uformelt nettverksarbeid mellom kommuner. Erfaringsutveksling og samarbeid."
+    },
+    {
+      "id": "Erfaringsoverføring",
+      "group": 9,
+      "description": "Systematisk deling av erfaringer, beste praksis og lærdommer på tvers av kommuner."
     }
   ],
   "links": [
@@ -216,6 +256,20 @@
     { "source": "Brukersentrert", "target": "Design/UU", "value": 1 },
     { "source": "Design/UU", "target": "Min Side", "value": 1 },
     { "source": "Design/UU", "target": "Søknad", "value": 1 },
-    { "source": "Administrator", "target": "Informasjonssikkerhet", "value": 1 }
+    { "source": "Administrator", "target": "Informasjonssikkerhet", "value": 1 },
+    { "source": "Administrator", "target": "Kommune", "value": 1 },
+    { "source": "Kommune", "target": "Bygg", "value": 1 },
+    { "source": "Kommune", "target": "Support/Opplæring", "value": 1 },
+    { "source": "Kommune", "target": "Drift", "value": 1 },
+    { "source": "Kommune", "target": "Brukerforum", "value": 1 },
+    { "source": "Kommune", "target": "Styringsgruppe", "value": 1 },
+    { "source": "Kommune", "target": "Nettverksarbeid", "value": 1 },
+    { "source": "Support/Opplæring", "target": "Erfaringsoverføring", "value": 1 },
+    { "source": "Brukerforum", "target": "Erfaringsoverføring", "value": 1 },
+    { "source": "Nettverksarbeid", "target": "Erfaringsoverføring", "value": 1 },
+    { "source": "Styringsgruppe", "target": "Utvikling", "value": 1 },
+    { "source": "Brukerforum", "target": "Utvikling", "value": 1 },
+    { "source": "Utvikling", "target": "Brukersentrert", "value": 1 },
+    { "source": "Drift", "target": "API", "value": 1 }
   ]
 }
